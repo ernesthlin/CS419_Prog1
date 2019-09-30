@@ -32,8 +32,13 @@ def main():
 
 		elif tokens[0] == "Authenticate":
 			print("Authenticating (user, password): ({}, {})".format(tokens[1], tokens[2]))
-			result = a1_lib.Authenticate(tokens[1], tokens[2])
-			print(result)
+			try:
+				result = a1_lib.Authenticate(tokens[1], tokens[2])
+			except ValueError as e:
+				print(str(e))
+				print()
+				continue
+			print("Successfully authenticated (user, password): ({}, {})".format(tokens[1], tokens[2]))
 			a1_lib.print_users()
 
 		elif tokens[0] == "AddUserToGroup":

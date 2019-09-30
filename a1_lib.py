@@ -23,10 +23,13 @@ def AddUser(user, password):
 	password = str(password)
 	# user exists
 	if user in users.keys(): 
-		raise ValueError("Error, user already exists")
+		raise ValueError("Error: user already exists")
+	
+	elif password == "":
+		raise ValueError("Error: password cannot be empty")
 	# user does not exist
 	else: 
-		users[user] = password # if password is empty, we shouldn't allow it right?
+		users[user] = password
 
 
 """
@@ -49,13 +52,14 @@ def Authenticate(user, password):
 		if password == users[user]:
 			return "Success"
 		# password is invalid
-		return "Failure: bad password"
+		raise ValueError("Error: incorrect password")
 	# user doesn't exist
-	return "Failure: no such user"
+	raise ValueError("Error: user doesn't exist")
 
 
 """
-Add a user to a user group. If the group name does not exist, it is created. If a user does not exist, the function should return an error.
+Add a user to a user group. If the group name does not exist, it is created. 
+If a user does not exist, the function should return an error.
 
 Test program:
 AddUserToGroup user usergroupname
@@ -63,14 +67,13 @@ AddUserToGroup user usergroupname
 The program should report
 - Success & list all the users in that group
 - Failure if the user does not exist
-CREATE USER GROUP EVEN IF USER DOESN'T EXIST?
 """
 def AddUserToGroup(user, groupname):
 	user = str(user)
 	groupname = str(groupname)
 	# user doesn't exist
 	if user not in users.keys():
-		raise ValueError("Error, user doesn't exist")
+		raise ValueError("Error: user doesn't exist")
 	# user does exist
 	# group name doesn't exist
 	if groupname not in user_groups.keys():
@@ -80,7 +83,8 @@ def AddUserToGroup(user, groupname):
 
 
 """
-Add an object to an object group. If the group name does not exist, it is created. The object can be any string.
+Add an object to an object group. If the group name does not exist, it is created. 
+The object can be any string.
 
 Test program:
 AddObjectToGroup objectname objectgroupname
@@ -100,16 +104,15 @@ def AddObjectToGroup(objectname, groupname):
 
 
 """
-Define an access right: a string that defines an access permission of a user group to an object group. The access permission can be an arbitrary string 
-that makes sense to the service.
+Define an access right: a string that defines an access permission of a user group to an object group. 
+The access permission can be an arbitrary string that makes sense to the service.
 
 Test program:
 AddAccess operation usergroupname [objectgroupname]
 
-The program will accept two or three strings. If objectgroupname is missing, it is considered null and the specified user group is simply permitted access 
-to the operation regardless of the object (or an object may not make sense for that operation).
-ADD USER GROUP NAME IF IT DOESN'T EXIST?????
-PRINT ACCESS CONTROLS FOR THE OPERATION????
+The program will accept two or three strings. If objectgroupname is missing, it is considered null and 
+the specified user group is simply permitted access to the operation regardless of the object (or an object 
+may not make sense for that operation).
 """
 def AddAccess(operation, usergroupname, objectgroupname = None):
 	operation = str(operation)
@@ -117,8 +120,10 @@ def AddAccess(operation, usergroupname, objectgroupname = None):
 	objectgroupname = str(objectgroupname) if objectgroupname else None
 	# user group doesn't exist
 	if usergroupname not in user_groups.keys():
-		raise ValueError("Error, user group doesn't exist")
-	# user group exists
+		raise ValueError("Error: user group doesn't exist")
+	# object group doesn't exist
+	if objectgroupname and objectgroupname not in object_groups.keys():
+		raise ValueError("Error: object group doesn't exist")
 	# operation doesn't exist
 	if operation not in access_controls.keys():
 		access_controls[operation] = []
@@ -127,16 +132,18 @@ def AddAccess(operation, usergroupname, objectgroupname = None):
 
 
 """
-Test whether a user can perform a specified operation on an object. Optionally, an object may be NULL, in which case CanAccess allows access if a user 
-is part of a group for an operation on which no object group was defined.
+Test whether a user can perform a specified operation on an object. Optionally, an object may be NULL, in which 
+case CanAccess allows access if a user is part of a group for an operation on which no object group was defined.
+
 Test program: 
 CanAccess operation user [object]
 
-The program will check whether the user is allowed to perform the specified operation on the object. That means that there exists a valid access right for 
-an operation where the user is in usergroupname and the object is in the corresponding objectgroupname.
-As with AddAccess, the program will accept two or three strings. If object is missing, it is considered null and the software allows access only if no object 
-groups were defined for that {operation, usergroupname} set.
-Note that the parameters here are user names and object names, not user groups and object groups.
+The program will check whether the user is allowed to perform the specified operation on the object. 
+That means that there exists a valid access right for an operation where the user is in usergroupname and the 
+object is in the corresponding objectgroupname. As with AddAccess, the program will accept two or three strings. 
+If object is missing, it is considered null and the software allows access only if no object groups were 
+defined for that {operation, usergroupname} set. Note that the parameters here are user names and object names, 
+not user groups and object groups.
 """
 def CanAccess(operation, user_name, object_name = None):
 	operation = str(operation)
@@ -144,18 +151,19 @@ def CanAccess(operation, user_name, object_name = None):
 	object_name = str(object_name) if object_name else None
 	# user doesn't exist
 	if user_name not in users.keys():
-		raise ValueError("Error, user doesn't exist")
+		raise ValueError("Error: user doesn't exist")
 	# user does exist
 	# operation doesn't exist
 	if operation not in access_controls.keys():
-		raise ValueError("Error, operation doesn't exist")
+		return False
 	# get list of user groups that the user is in
 	valid_user_groups = [key for key, value in user_groups.items() if user_name in value]
 	# object is "missing"
 	if not object_name:
 		return any([(pair[0] in valid_user_groups) for pair in access_controls[operation] if pair[1] == None])
 	# object is not "missing"
-	return any([(pair[0] in valid_user_groups) for pair in access_controls[operation] if object_name in object_groups[pair[1]]])
+	return any([(pair[0] in valid_user_groups) for pair in access_controls[operation] 
+		if pair[1] == None or object_name in object_groups[pair[1]]])
 
 
 def store_data():

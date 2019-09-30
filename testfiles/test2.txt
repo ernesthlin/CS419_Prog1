@@ -1,0 +1,18 @@
+AddUser DAVID ASDF
+AddUser david asdf
+Authenticate David password
+Authenticate DAVID password
+Authenticate david asdf
+AddUserToGroup david CS
+AddObjectToGroup file project
+AddAccess write unknown
+AddAccess write CS unknown
+AddAccess write CS project
+AddAccess read CS
+CanAccess write David
+CanAccess write DAVID
+CanAccess execute david
+CanAccess write david
+CanAccess write david file
+CanAccess read david
+CanAccess read david file
