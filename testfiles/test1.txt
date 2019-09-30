@@ -1,0 +1,25 @@
+AddUser ernest password
+AddUser eddie 12341
+AddUser ernest dog
+AddUser robert 5j120e
+AddUser yousef jordy
+AddUser jessica jess123
+AddUser robert mill90
+Authenticate ernest dog
+Authenticate ernest password
+Authenticate bobby 3
+Authenticate yousef jordy
+AddUserToGroup ernest movie_lovers
+AddUserToGroup eddie movie_lovers
+AddUserToGroup bobby tv_lovers
+AddUserToGroup jessica movie_lovers
+AddUserToGroup robert tv_lovers
+AddUser bobby billbert123
+AddUserToGroup bobby tv_lovers
+AddObjectToGroup thisobj objgroupA
+AddObjectToGroup thatobj objgroupA
+AddObjectToGroup myobj objgroupB
+AddAccess edit ernest objgroupA
+AddAccess edit movie_lovers objgroupA
+CanAccess edit ernest thatobj
+CanAccess edit ernest myobj
