@@ -158,10 +158,13 @@ def CanAccess(operation, user_name, object_name = None):
 		return False
 	# get list of user groups that the user is in
 	valid_user_groups = [key for key, value in user_groups.items() if user_name in value]
-	# object is "missing"
+	object is "missing"
 	if not object_name:
 		return any([(pair[0] in valid_user_groups) for pair in access_controls[operation] if pair[1] == None])
-	# object is not "missing"
+	# object is not "missing" but doesn't exist
+	if object_name not in [obj for object_group in object_groups.keys() for obj in object_groups[object_group]]:
+		raise ValueError("Error: object doesn't exist")
+	# object is not "missing" but does exist
 	return any([(pair[0] in valid_user_groups) for pair in access_controls[operation] 
 		if pair[1] == None or object_name in object_groups[pair[1]]])
 
@@ -195,5 +198,5 @@ def print_groups(is_user = True):
 
 
 def print_accesscontrols():
-	print_str = "\n".join(["{}: ({}, {})".format(kv[0], pair[0], pair[1]) for kv in access_controls.items() for pair in kv[1]])
+	print_str = "\n".join(["{}: {}".format(operation, access_controls[operation]) for operation in access_controls.keys()])
 	print(print_str)

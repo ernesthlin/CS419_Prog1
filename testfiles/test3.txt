@@ -1,0 +1,10 @@
+AddUser ernest password
+AddUser eddie 12341
+AddUser ernest dog
+AddUser robert 5j120e
+AddUser yousef jordy
+CanAccess read bobby
+CanAccess read ernest
+CanAccess edit bobby pizza
+CanAccess read bobby pizza
+CanAccess edit bobby table

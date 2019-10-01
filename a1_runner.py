@@ -13,7 +13,8 @@ def main():
 
 	args = vars(parser.parse_args())
 	file_name = args["filename"]
-	source_file = args["persist"]
+	source_filename = args["persist"]
+	if source_filename
 
 	with open("./testfiles/{}".format(file_name), "r") as testfile_reader:
 		line_list = testfile_reader.readlines()

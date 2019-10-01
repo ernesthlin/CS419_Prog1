@@ -16,10 +16,27 @@ AddUserToGroup jessica movie_lovers
 AddUserToGroup robert tv_lovers
 AddUser bobby billbert123
 AddUserToGroup bobby tv_lovers
-AddObjectToGroup thisobj objgroupA
-AddObjectToGroup thatobj objgroupA
-AddObjectToGroup myobj objgroupB
-AddAccess edit ernest objgroupA
-AddAccess edit movie_lovers objgroupA
-CanAccess edit ernest thatobj
-CanAccess edit ernest myobj
+AddObjectToGroup ice_cream food
+AddObjectToGroup pizza food
+AddObjectToGroup table furniture
+AddAccess edit ernest food
+AddAccess edit movie_lovers food
+CanAccess edit ernest pizza
+CanAccess edit ernest table
+AddAccess read tv_lovers
+CanAccess read robert
+CanAccess read bobby
+CanAccess read ernest
+CanAccess edit bobby pizza
+CanAccess read bobby pizza
+CanAccess edit bobby table
+CanAccess read bobby table
+AddObjectToGroup cheesecake food
+CanAccess read bobby cheesecake
+AddUserToGroup ernest tv_lovers
+CanAccess read ernest
+CanAccess read ernest table
+CanAccess read ernest randobj
+AddAccess edit tv_lovers furniture
+CanAccess edit bobby table
+CanAccess edit bobby food
