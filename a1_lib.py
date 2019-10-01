@@ -11,7 +11,7 @@ access_controls = {} # key is operation name, value is a list of 2-item tuples t
 
 
 """
-Define a new user for the system along with the user’s password, both strings.
+Define a new user for the system along with the user's password, both strings.
 
 Test program:
 AddUser myname mypassword
@@ -33,7 +33,7 @@ def AddUser(user, password):
 
 
 """
-Validate a user’s password by passing the username and password, both strings.
+Validate a user's password by passing the username and password, both strings.
 
 Test program:
 Authenticate myname mypassword
@@ -167,23 +167,7 @@ def CanAccess(operation, user_name, object_name = None):
 	# object is not "missing" but does exist
 	return any([(pair[0] in valid_user_groups) for pair in access_controls[operation] 
 		if pair[1] == None or object_name in object_groups[pair[1]]])
-
-
-def store_data(filepath):
-	with open("{}.pickle".format(filepath), "wb") as pickle_file:
-		pickle.dump(users, pickle_file)
-		pickle.dump(user_groups, pickle_file)
-		pickle.dump(object_groups, pickle_file)
-		pickle.dump(access_controls, pickle_file)
-
-
-def load_data(filepath):
-	with open("{}.pickle".format(filepath), "rb") as pickle_file:
-		users = pickle.load(pickle_file)
-		user_groups = pickle.load(pickle_file)
-		object_groups = pickle.load(pickle_file)
-		access_controls = pickle.load(pickle_file)
-
+	
 
 def print_users():
 	print("Users:")
@@ -192,9 +176,12 @@ def print_users():
 
 
 def print_groups(is_user = True):
+	if is_user:
+		print("User Groups")
+	else:
+		print("Object Groups")
 	groups = user_groups if is_user else object_groups
-	print_str = "\n".join(["{} = {}".format(pair[0], pair[1]) for pair in groups.items()])
-	print(print_str)
+	print("\n".join(["{}: {}".format(group, ", ".join(groups[group])) for group in groups.keys()]))
 
 
 def print_accesscontrols():
