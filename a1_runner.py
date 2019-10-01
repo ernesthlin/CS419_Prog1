@@ -1,22 +1,24 @@
 import a1_lib
 import os
 import argparse
+import pickle
 """
 Program Runner for Authentication and Access Control Mechanism Library
 Group: Ernest Lin, David Tian, Justin Chan
 """
 def main():
 	# parse all the arguments to the client 
-	parser = argparse.ArgumentParser(description = "ACM Library")
-	parser.add_argument("-f","--filename", help = "Text file with commands", required = True)
-	parser.add_argument("-p","--persist", help = "Name of file to store results in (WITHOUT EXTENSION)", required = False)
+	parser = argparse.ArgumentParser(description = "ACM Library Runner/Tester")
+	parser.add_argument("-f","--filename", help = "Path of text file with commands", required = True)
+	parser.add_argument("-p","--persist", help = "File path to store results in (WITHOUT EXTENSION OF FILE)", required = False)
 
 	args = vars(parser.parse_args())
-	file_name = args["filename"]
-	source_filename = args["persist"]
-	if source_filename
+	file_path = args["filename"]
+	source_file_path = args["persist"]
+	if source_file_path and os.path.exists("{}.pickle".format(source_file_path)):
+		load_data(source_file_path)
 
-	with open("./testfiles/{}".format(file_name), "r") as testfile_reader:
+	with open("{}".format(file_path), "r") as testfile_reader:
 		line_list = testfile_reader.readlines()
 	for line in line_list:
 		tokens = line.strip().split(" ")
@@ -110,5 +112,25 @@ def main():
 	print("-" * 40)
 	a1_lib.print_accesscontrols()
 
+	if source_file_path:
+		store_data(source_file_path)
 
-main()
+
+def store_data(filepath):
+	with open("{}.pickle".format(filepath), "wb") as pickle_file:
+		pickle.dump(a1_lib.users, pickle_file)
+		pickle.dump(a1_lib.user_groups, pickle_file)
+		pickle.dump(a1_lib.object_groups, pickle_file)
+		pickle.dump(a1_lib.access_controls, pickle_file)
+
+
+def load_data(filepath):
+	with open("{}.pickle".format(filepath), "rb") as pickle_file:
+		a1_lib.users = pickle.load(pickle_file)
+		a1_lib.user_groups = pickle.load(pickle_file)
+		a1_lib.object_groups = pickle.load(pickle_file)
+		a1_lib.access_controls = pickle.load(pickle_file)
+
+
+if __name__ == "__main__":
+	main()

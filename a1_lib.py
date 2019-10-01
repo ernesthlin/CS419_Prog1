@@ -169,16 +169,16 @@ def CanAccess(operation, user_name, object_name = None):
 		if pair[1] == None or object_name in object_groups[pair[1]]])
 
 
-def store_data():
-	with open("./tables/mydata.pickle", "wb") as pickle_file:
+def store_data(filepath):
+	with open("{}.pickle".format(filepath), "wb") as pickle_file:
 		pickle.dump(users, pickle_file)
 		pickle.dump(user_groups, pickle_file)
 		pickle.dump(object_groups, pickle_file)
 		pickle.dump(access_controls, pickle_file)
 
 
-def load_data():
-	with open("./tables/mydata.pickle", "rb") as pickle_file:
+def load_data(filepath):
+	with open("{}.pickle".format(filepath), "rb") as pickle_file:
 		users = pickle.load(pickle_file)
 		user_groups = pickle.load(pickle_file)
 		object_groups = pickle.load(pickle_file)
