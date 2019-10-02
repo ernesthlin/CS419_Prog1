@@ -28,7 +28,7 @@ def main():
 				a1_lib.AddUser(tokens[1], tokens[2])
 			except ValueError as e:
 				print(str(e))
-				print
+				print("\n")
 				continue
 			print("Successfully added (user, password): ({}, {})".format(tokens[1], tokens[2]))
 			a1_lib.print_users()
@@ -39,7 +39,7 @@ def main():
 				result = a1_lib.Authenticate(tokens[1], tokens[2])
 			except ValueError as e:
 				print(str(e))
-				print
+				print("\n")
 				continue
 			print("Successfully authenticated (user, password): ({}, {})".format(tokens[1], tokens[2]))
 			a1_lib.print_users()
@@ -50,7 +50,7 @@ def main():
 				usergroup_list = a1_lib.AddUserToGroup(tokens[1], tokens[2])
 			except ValueError as e:
 				print(str(e))
-				print
+				print("\n")
 				continue
 			print("Added user {} to group {}: {}".format(tokens[1], tokens[2], usergroup_list))
 			a1_lib.print_users()
@@ -71,7 +71,7 @@ def main():
 				access_controls_list = a1_lib.AddAccess(tokens[1], tokens[2], tokens[3])
 			except ValueError as e:
 				print(str(e))
-				print
+				print("\n")
 				continue
 			print("Added access for user group {} on object group {} for operation {}: {}".format(tokens[2], objectgroupname, tokens[1], access_controls_list))
 			a1_lib.print_groups()
@@ -87,7 +87,7 @@ def main():
 				result = a1_lib.CanAccess(tokens[1], tokens[2], tokens[3])
 			except ValueError as e:
 				print(str(e))
-				print
+				print("\n")
 				continue
 			if result:
 				print("User {} can {} object {}".format(tokens[2], tokens[1], objectname))
@@ -100,7 +100,7 @@ def main():
 		else:
 			raise IOError("File input is invalid, first argument on each line should be a command.")
 
-		print
+		print("\n")
 
 	print("Final results")
 	print("-" * 40)

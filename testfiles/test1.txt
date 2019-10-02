@@ -40,3 +40,4 @@ CanAccess read ernest randobj
 AddAccess edit tv_lovers furniture
 CanAccess edit bobby table
 CanAccess edit bobby food
+CanAccess smash robert food

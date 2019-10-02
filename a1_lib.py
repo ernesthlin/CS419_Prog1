@@ -7,7 +7,7 @@ Group: Ernest Lin, David Tian, Justin Chan
 users = {} # key is user string, value is password string
 user_groups = {} # key is group name, value is set of participating users
 object_groups = {} # key is group name, value is set of participating objects
-access_controls = {} # key is operation name, value is a list of 2-item tuples that are (user group, object)
+access_controls = {} # key is operation name, value is a set of 2-item tuples that are (user group, object)
 
 
 """
@@ -126,8 +126,8 @@ def AddAccess(operation, usergroupname, objectgroupname = None):
 		raise ValueError("Error: object group doesn't exist")
 	# operation doesn't exist
 	if operation not in access_controls.keys():
-		access_controls[operation] = []
-	access_controls[operation].append((usergroupname, objectgroupname))
+		access_controls[operation] = set()
+	access_controls[operation].add((usergroupname, objectgroupname))
 	return access_controls[operation]
 
 
@@ -155,10 +155,10 @@ def CanAccess(operation, user_name, object_name = None):
 	# user does exist
 	# operation doesn't exist
 	if operation not in access_controls.keys():
-		return False
+		raise ValueError("Error: operation doesn't exist")
 	# get list of user groups that the user is in
 	valid_user_groups = [key for key, value in user_groups.items() if user_name in value]
-	object is "missing"
+	# object is "missing"
 	if not object_name:
 		return any([(pair[0] in valid_user_groups) for pair in access_controls[operation] if pair[1] == None])
 	# object is not "missing" but doesn't exist
@@ -185,5 +185,6 @@ def print_groups(is_user = True):
 
 
 def print_accesscontrols():
-	print_str = "\n".join(["{}: {}".format(operation, access_controls[operation]) for operation in access_controls.keys()])
+	print("Access Controls")
+	print_str = "\n".join(["{}: {}".format(operation, ", ".join(["({}, {})".format(u, o) for u, o in access_controls[operation]])) for operation in access_controls.keys()])
 	print(print_str)
