@@ -15,6 +15,17 @@
  *
  */
 
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.SecureRandom;
+
 public class Cryptr {
 
 
@@ -23,10 +34,13 @@ public class Cryptr {
 	 *
 	 * @param  secKeyFile    name of file to store secret key
 	 */
-	static void generateKey(String secKeyFile) throws Exception{
-
-		/*   FILL HERE   */
-
+	static void generateKey(String secKeyFile) throws Exception {
+		KeyGenerator kGen = KeyGenerator.getInstance("AES");
+		SecretKey sKey = kGen.generateKey();
+		try(FileOutputStream out = new FileOutputStream(secKeyFile)) {
+			byte[] keyBytes = sKey.getEncoded();
+			out.write(keyBytes);
+		}
 	}
 
 
@@ -40,10 +54,36 @@ public class Cryptr {
 	 * @param  secKeyFile      name of file storing secret key
 	 * @param  encryptedFile   name of file to write iv and encrypted file data
 	 */
-	static void encryptFile(String originalFile, String secKeyFile, String encryptedFile) {
+	static void encryptFile(String originalFile, String secKeyFile, String encryptedFile) throws Exception {
+		// Load secret key from file
+		byte[] keyBytes = Files.readAllBytes(Paths.get(secKeyFile));
+		SecretKeySpec sKey = new SecretKeySpec(keyBytes, "AES");
 
-		/*   FILL HERE   */
+		// Generate an initialization vector
+		SecureRandom sRandom = new SecureRandom();
+		byte[] iv = new byte[16];
+		sRandom.nextBytes(iv);
+		IvParameterSpec ivSpec = new IvParameterSpec(iv);
 
+		// Initialize the Cipher
+		Cipher ci = Cipher.getInstance("AES/CBC/PKCS5Padding");
+		ci.init(Cipher.ENCRYPT_MODE, sKey, ivSpec);
+
+		try (FileInputStream in = new FileInputStream(originalFile);
+			 FileOutputStream out = new FileOutputStream(encryptedFile)) {
+			// Write the initialization vector
+			out.write(iv);
+
+			// Encrypt and write the original file
+			byte[] inBuf = new byte[1024];
+			int len;
+			while ((len = in.read(inBuf)) != -1) {
+				byte[] outBuf = ci.update(inBuf, 0, len);
+				if (outBuf != null) out.write(outBuf);
+			}
+			byte[] outBuf = ci.doFinal();
+			if (outBuf != null) out.write(outBuf);
+		}
 	}
 
 
@@ -57,10 +97,32 @@ public class Cryptr {
 	 * @param  secKeyFile	    name of file storing secret key
 	 * @param  outputFile       name of file to write decrypted data to
 	 */
-	static void decryptFile(String encryptedFile, String secKeyFile, String outputFile) {
+	static void decryptFile(String encryptedFile, String secKeyFile, String outputFile) throws Exception {
+		// Load secret key from file
+		byte[] keyBytes = Files.readAllBytes(Paths.get(secKeyFile));
+		SecretKeySpec sKey = new SecretKeySpec(keyBytes, "AES");
 
-		/*   FILL HERE   */
+		try (FileInputStream in = new FileInputStream(encryptedFile);
+			 FileOutputStream out = new FileOutputStream(outputFile)) {
+			// Read the initialization vector
+			byte[] iv = new byte[16];
+			in.read(iv);
+			IvParameterSpec ivSpec = new IvParameterSpec(iv);
 
+			// Initialize the Cipher
+			Cipher ci = Cipher.getInstance("AES/CBC/PKCS5Padding");
+			ci.init(Cipher.DECRYPT_MODE, sKey, ivSpec);
+
+			// Decrypt and write the encrypted file
+			byte[] inBuf = new byte[1024];
+			int len;
+			while ((len = in.read(inBuf)) != -1) {
+				byte[] outBuf = ci.update(inBuf, 0, len);
+				if (outBuf != null) out.write(outBuf);
+			}
+			byte[] outBuf = ci.doFinal();
+			if (outBuf != null) out.write(outBuf);
+		}
 	}
 
 
