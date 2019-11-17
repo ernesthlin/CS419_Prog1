@@ -20,11 +20,18 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.DataInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 
 public class Cryptr {
 
@@ -55,7 +62,7 @@ public class Cryptr {
 	 * @param  encryptedFile   name of file to write iv and encrypted file data
 	 */
 	static void encryptFile(String originalFile, String secKeyFile, String encryptedFile) throws Exception {
-		// Load secret key from file
+		// Read secret key from file
 		byte[] keyBytes = Files.readAllBytes(Paths.get(secKeyFile));
 		SecretKeySpec sKey = new SecretKeySpec(keyBytes, "AES");
 
@@ -65,7 +72,7 @@ public class Cryptr {
 		sRandom.nextBytes(iv);
 		IvParameterSpec ivSpec = new IvParameterSpec(iv);
 
-		// Initialize the Cipher
+		// Initialize Cipher
 		Cipher ci = Cipher.getInstance("AES/CBC/PKCS5Padding");
 		ci.init(Cipher.ENCRYPT_MODE, sKey, ivSpec);
 
@@ -98,7 +105,7 @@ public class Cryptr {
 	 * @param  outputFile       name of file to write decrypted data to
 	 */
 	static void decryptFile(String encryptedFile, String secKeyFile, String outputFile) throws Exception {
-		// Load secret key from file
+		// Read secret key from file
 		byte[] keyBytes = Files.readAllBytes(Paths.get(secKeyFile));
 		SecretKeySpec sKey = new SecretKeySpec(keyBytes, "AES");
 
@@ -109,7 +116,7 @@ public class Cryptr {
 			in.read(iv);
 			IvParameterSpec ivSpec = new IvParameterSpec(iv);
 
-			// Initialize the Cipher
+			// Initialize Cipher
 			Cipher ci = Cipher.getInstance("AES/CBC/PKCS5Padding");
 			ci.init(Cipher.DECRYPT_MODE, sKey, ivSpec);
 
@@ -134,10 +141,36 @@ public class Cryptr {
 	 * @param  pubKeyFile    name of public key file for encryption
 	 * @param  encKeyFile    name of file to write encrypted secret key
 	 */
-	static void encryptKey(String secKeyFile, String pubKeyFile, String encKeyFile) {
+	static void encryptKey(String secKeyFile, String pubKeyFile, String encKeyFile) throws Exception {
+		// Read public key from file
+		File f = new File(pubKeyFile);
+		byte[] keyBytes;
+		try (FileInputStream fis = new FileInputStream(f);
+			 DataInputStream dis = new DataInputStream(fis)) {
+			keyBytes = new byte[(int) f.length()];
+			dis.readFully(keyBytes);
+		}
+		X509EncodedKeySpec spec =
+				new X509EncodedKeySpec(keyBytes);
+		KeyFactory kf = KeyFactory.getInstance("RSA");
+		PublicKey pubKey = kf.generatePublic(spec);
 
-		/*   FILL HERE   */
+		// Initialize Cipher
+		Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+		cipher.init(Cipher.ENCRYPT_MODE, pubKey);
 
+		// Encrypt the secret key using the public key
+		try (FileInputStream in = new FileInputStream(secKeyFile);
+			 FileOutputStream out = new FileOutputStream(encKeyFile)) {
+			byte[] inBuf = new byte[1024];
+			int len;
+			while ((len = in.read(inBuf)) != -1) {
+				byte[] outBuf = cipher.update(inBuf, 0, len);
+				if (outBuf != null) out.write(outBuf);
+			}
+			byte[] outBuf = cipher.doFinal();
+			if (outBuf != null) out.write(outBuf);
+		}
 	}
 
 
@@ -149,10 +182,37 @@ public class Cryptr {
 	 * @param  privKeyFile      name of private key file for decryption
 	 * @param  secKeyFile       name of file to write decrypted secret key
 	 */
-	static void decryptKey(String encKeyFile, String privKeyFile, String secKeyFile) {
+	static void decryptKey(String encKeyFile, String privKeyFile, String secKeyFile) throws Exception {
+		// Read private key from file
+		File f = new File(privKeyFile);
+		byte[] keyBytes;
+		try (FileInputStream fis = new FileInputStream(f);
+			 DataInputStream dis = new DataInputStream(fis)) {
+			keyBytes = new byte[(int) f.length()];
+			dis.readFully(keyBytes);
+		}
 
-		/*   FILL HERE   */
+		PKCS8EncodedKeySpec spec =
+				new PKCS8EncodedKeySpec(keyBytes);
+		KeyFactory kf = KeyFactory.getInstance("RSA");
+		PrivateKey privKey = kf.generatePrivate(spec);
 
+		// Initialize Cipher
+		Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+		cipher.init(Cipher.DECRYPT_MODE, privKey);
+
+		// Decrypt the secret key using the private key
+		try (FileInputStream in = new FileInputStream(encKeyFile);
+			 FileOutputStream out = new FileOutputStream(secKeyFile)) {
+			byte[] inBuf = new byte[1024];
+			int len;
+			while ((len = in.read(inBuf)) != -1) {
+				byte[] outBuf = cipher.update(inBuf, 0, len);
+				if (outBuf != null) out.write(outBuf);
+			}
+			byte[] outBuf = cipher.doFinal();
+			if (outBuf != null) out.write(outBuf);
+		}
 	}
 
 
