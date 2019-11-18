@@ -15,6 +15,12 @@
  *
  */
 
+/* Group Members:
+ * David Tian
+ * Ernest Lin
+ * Justin Chan
+ */
+
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -34,7 +40,6 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
 public class Cryptr {
-
 
 	/**
 	 * Generates an 128-bit AES secret key and writes it to a file
@@ -73,8 +78,8 @@ public class Cryptr {
 		IvParameterSpec ivSpec = new IvParameterSpec(iv);
 
 		// Initialize Cipher
-		Cipher ci = Cipher.getInstance("AES/CBC/PKCS5Padding");
-		ci.init(Cipher.ENCRYPT_MODE, sKey, ivSpec);
+		Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+		cipher.init(Cipher.ENCRYPT_MODE, sKey, ivSpec);
 
 		try (FileInputStream in = new FileInputStream(originalFile);
 			 FileOutputStream out = new FileOutputStream(encryptedFile)) {
@@ -82,14 +87,7 @@ public class Cryptr {
 			out.write(iv);
 
 			// Encrypt and write the original file
-			byte[] inBuf = new byte[1024];
-			int len;
-			while ((len = in.read(inBuf)) != -1) {
-				byte[] outBuf = ci.update(inBuf, 0, len);
-				if (outBuf != null) out.write(outBuf);
-			}
-			byte[] outBuf = ci.doFinal();
-			if (outBuf != null) out.write(outBuf);
+			applyCipher(cipher, in, out);
 		}
 	}
 
@@ -117,18 +115,11 @@ public class Cryptr {
 			IvParameterSpec ivSpec = new IvParameterSpec(iv);
 
 			// Initialize Cipher
-			Cipher ci = Cipher.getInstance("AES/CBC/PKCS5Padding");
-			ci.init(Cipher.DECRYPT_MODE, sKey, ivSpec);
+			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+			cipher.init(Cipher.DECRYPT_MODE, sKey, ivSpec);
 
 			// Decrypt and write the encrypted file
-			byte[] inBuf = new byte[1024];
-			int len;
-			while ((len = in.read(inBuf)) != -1) {
-				byte[] outBuf = ci.update(inBuf, 0, len);
-				if (outBuf != null) out.write(outBuf);
-			}
-			byte[] outBuf = ci.doFinal();
-			if (outBuf != null) out.write(outBuf);
+			applyCipher(cipher, in, out);
 		}
 	}
 
@@ -150,8 +141,7 @@ public class Cryptr {
 			keyBytes = new byte[(int) f.length()];
 			dis.readFully(keyBytes);
 		}
-		X509EncodedKeySpec spec =
-				new X509EncodedKeySpec(keyBytes);
+		X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
 		KeyFactory kf = KeyFactory.getInstance("RSA");
 		PublicKey pubKey = kf.generatePublic(spec);
 
@@ -162,14 +152,7 @@ public class Cryptr {
 		// Encrypt the secret key using the public key
 		try (FileInputStream in = new FileInputStream(secKeyFile);
 			 FileOutputStream out = new FileOutputStream(encKeyFile)) {
-			byte[] inBuf = new byte[1024];
-			int len;
-			while ((len = in.read(inBuf)) != -1) {
-				byte[] outBuf = cipher.update(inBuf, 0, len);
-				if (outBuf != null) out.write(outBuf);
-			}
-			byte[] outBuf = cipher.doFinal();
-			if (outBuf != null) out.write(outBuf);
+			applyCipher(cipher, in, out);
 		}
 	}
 
@@ -191,9 +174,7 @@ public class Cryptr {
 			keyBytes = new byte[(int) f.length()];
 			dis.readFully(keyBytes);
 		}
-
-		PKCS8EncodedKeySpec spec =
-				new PKCS8EncodedKeySpec(keyBytes);
+		PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
 		KeyFactory kf = KeyFactory.getInstance("RSA");
 		PrivateKey privKey = kf.generatePrivate(spec);
 
@@ -204,17 +185,20 @@ public class Cryptr {
 		// Decrypt the secret key using the private key
 		try (FileInputStream in = new FileInputStream(encKeyFile);
 			 FileOutputStream out = new FileOutputStream(secKeyFile)) {
-			byte[] inBuf = new byte[1024];
-			int len;
-			while ((len = in.read(inBuf)) != -1) {
-				byte[] outBuf = cipher.update(inBuf, 0, len);
-				if (outBuf != null) out.write(outBuf);
-			}
-			byte[] outBuf = cipher.doFinal();
-			if (outBuf != null) out.write(outBuf);
+			applyCipher(cipher, in, out);
 		}
 	}
 
+	static void applyCipher(Cipher cipher, FileInputStream in, FileOutputStream out) throws Exception {
+		byte[] inBuf = new byte[1024];
+		int len;
+		while ((len = in.read(inBuf)) != -1) {
+			byte[] outBuf = cipher.update(inBuf, 0, len);
+			if (outBuf != null) out.write(outBuf);
+		}
+		byte[] outBuf = cipher.doFinal();
+		if (outBuf != null) out.write(outBuf);
+	}
 
 	/**
 	 * Main Program Runner
